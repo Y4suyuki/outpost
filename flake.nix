@@ -35,11 +35,11 @@
           };
           workshop = {
             path = ./loadouts/workshop;
-            description = "Full development environment with toolchains, linters, and runtime hooks";
+            description = "Full development environment with toolchains, treefmt, and runtime hooks";
           };
           sentinel = {
             path = ./loadouts/sentinel;
-            description = "Lightweight headless server node baseline with telemetry & hardening";
+            description = "Lightweight headless server node baseline with telemetry & diagnostics";
           };
         };
       };

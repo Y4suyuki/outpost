@@ -1,0 +1,27 @@
+name: Pre-Combat Inspections (PCI)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  flake-inspection:
+    name: Flake Integrity & DevShell Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Outpost
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v12
+
+      - name: Flake Check (Root)
+        run: nix flake check
+
+      - name: Flake Check (Recon Loadout)
+        run: |
+          cd loadouts/recon
+          nix flake check
+          nix develop --command echo "Recon devShell operational."
