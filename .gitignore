@@ -1,0 +1,22 @@
+# System & Editor
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+
+# Nix artifacts
+result
+result-*
+.direnv/
+
+# Secrets & Environment variables
+*.env
+*.envrc.local
+*.key
+*.pem
+*.id_ed25519*
+
+# Ansible artifacts
+*.retry
+.ansible/
