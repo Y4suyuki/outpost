@@ -1,0 +1,9 @@
+---
+- name: "Outpost: Provision Host Baseline"
+  hosts: all
+  become: true
+  roles:
+    - role: hardening
+      tags: [hardening, security]
+    - role: telemetry
+      tags: [telemetry, monitoring]

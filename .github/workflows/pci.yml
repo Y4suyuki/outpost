@@ -25,3 +25,20 @@ jobs:
           cd loadouts/recon
           nix flake check
           nix develop --command echo "Recon devShell operational."
+
+  ansible-inspection:
+    name: Ansible Syntax & Playbook Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Outpost
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          pipx install ansible-core
+          ansible-galaxy collection install community.general
+
+      - name: Verify Playbook Syntax
+        run: |
+          cd materiel/playbooks
+          ansible-playbook site.yml --syntax-check
