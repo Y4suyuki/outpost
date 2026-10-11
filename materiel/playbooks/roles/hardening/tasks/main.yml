@@ -1,0 +1,45 @@
+---
+- name: Install perimeter security packages
+  ansible.builtin.package:
+    name:
+      - ufw
+      - fail2ban
+      - sudo
+    state: present
+    update_cache: true
+
+- name: Enforce hardened SSH configuration
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    validate: "/usr/sbin/sshd -t -f %s"
+  loop:
+    - { regexp: '^#?PermitRootLogin', line: 'PermitRootLogin {{ hardening_allow_root_login }}' }
+    - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication {{ hardening_password_authentication }}' }
+    - { regexp: '^#?PubkeyAuthentication', line: 'PubkeyAuthentication yes' }
+    - { regexp: '^#?X11Forwarding', line: 'X11Forwarding no' }
+    - { regexp: '^#?MaxAuthTries', line: 'MaxAuthTries 4' }
+  notify: Restart ssh
+
+- name: Set UFW default input policy
+  community.general.ufw:
+    direction: incoming
+    policy: "{{ hardening_ufw_default_input_policy }}"
+
+- name: Set UFW default output policy
+  community.general.ufw:
+    direction: outgoing
+    policy: "{{ hardening_ufw_default_output_policy }}"
+
+- name: Allow rate-limited SSH through UFW
+  community.general.ufw:
+    rule: limit
+    port: "{{ hardening_ssh_port }}"
+    proto: tcp
+
+- name: Enable UFW firewall
+  community.general.ufw:
+    state: enabled
+  notify: Reload ufw
