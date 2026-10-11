@@ -78,4 +78,19 @@ Executed by CI runners prior to accepting changes into `main`:
 
 * **Profile: `tactical` (Project Development)**
   * Scoped development environments powered by Nix flakes and `direnv`.
-  * Secrets scoped per-project; access to local database and testing harnesses
+  * Secrets scoped per-project; access to local database and testing harnesses.
+
+* **Profile: `garrison` (Persistent Host / Infrastructure)**
+  * Hardened servers, homelab nodes, or primary workstations.
+  * Full telemetry, automated security updates, systemd service management, and durable backup policies.
+
+---
+
+## 5. PACE Resilience Planning
+
+Every environment must maintain a PACE fallback for connectivity, updates, and recovery:
+
+* **Primary (P):** GitHub repository flakes and automated CI pipelines.
+* **Alternate (A):** Local Git mirror or self-hosted registry.
+* **Contingency (C):** Pre-built Nix closure archives or standalone `ansible-pull` manifests.
+* **Emergency (E):** Minimal, POSIX-compliant bootstrap shell script providing raw, secure SSH recovery.
