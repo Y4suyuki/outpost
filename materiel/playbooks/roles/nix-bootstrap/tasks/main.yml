@@ -1,0 +1,81 @@
+---
+- name: Check whether Nix is already installed
+  ansible.builtin.stat:
+    path: /nix/store
+  register: nix_store
+  changed_when: false
+
+- name: Fail early on unsupported OS family
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family in ['Debian', 'RedHat']
+    fail_msg: >-
+      nix-bootstrap targets Debian/Ubuntu (and RHEL-family).
+      Detected: {{ ansible_os_family }}
+    quiet: true
+
+- name: Ensure bash is present (multi-user installer requires it)
+  ansible.builtin.package:
+    name: bash
+    state: present
+    update_cache: true
+  when:
+    - ansible_os_family == 'Debian'
+    - not nix_store.stat.exists
+
+- name: Ensure systemd is available (required for multi-user install)
+  ansible.builtin.stat:
+    path: /run/systemd/system
+  register: systemd_present
+  changed_when: false
+  when: not nix_store.stat.exists
+
+- name: Fail if systemd is missing
+  ansible.builtin.assert:
+    that: systemd_present.stat.exists
+    fail_msg: >-
+      Multi-user Nix install requires a systemd-managed host.
+      This target has no running systemd.
+  when: not nix_store.stat.exists
+
+- name: Install Nix (multi-user, non-interactive)
+  when: not nix_store.stat.exists
+  block:
+    - name: Fetch the official Nix install script
+      ansible.builtin.get_url:
+        url: "https://nixos.org/nix/install"
+        dest: "/tmp/nix-install-{{ inventory_hostname }}.sh"
+        mode: "0755"
+
+    - name: Run Nix multi-user installer
+      ansible.builtin.command:
+        cmd: >-
+          sh /tmp/nix-install-{{ inventory_hostname }}.sh
+          --daemon --yes --no-channel-add
+          {{ nix_install_extra_args }}
+      register: nix_install_out
+      changed_when: nix_install_out.rc == 0
+      # The installer is idempotent-ish but re-runs channel/profile setup;
+      # we only ever run it once (guarded by nix_store above).
+      environment:
+        # Keep the installer non-interactive in every code path.
+        NIX_INSTALLER_YES: "1"
+
+- name: Remove installer script
+  ansible.builtin.file:
+    path: "/tmp/nix-install-{{ inventory_hostname }}.sh"
+    state: absent
+  when: not nix_store.stat.exists
+
+- name: Verify Nix installation (daemon profile)
+  ansible.builtin.command:
+    cmd: /nix/var/nix/profiles/default/bin/nix --version
+  register: nix_version
+  changed_when: false
+
+- name: Report Nix version
+  ansible.builtin.debug:
+    msg: >-
+      Nix ready on {{ inventory_hostname }}: {{ nix_version.stdout }}.
+      Station toolchain: nix develop github:Y4suyuki/outpost#recon
+  changed_when: false

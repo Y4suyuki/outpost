@@ -2,8 +2,21 @@
 - name: "Outpost: Provision Host Baseline"
   hosts: all
   become: true
+  vars:
+    # profile: recon | tactical | garrison | sentinel
+    #   recon/tactical/garrison -> bootstrap Nix (the station toolchain lives
+    #                              in the flake; the host only needs Nix).
+    #   sentinel                -> harden + monitor a non-Nix target.
+    profile: sentinel
   roles:
+    - role: nix-bootstrap
+      tags: [nix, bootstrap, station]
+      when: profile in ['recon', 'tactical', 'garrison']
+
     - role: hardening
       tags: [hardening, security]
+      when: profile == 'sentinel'
+
     - role: telemetry
       tags: [telemetry, monitoring]
+      when: profile == 'sentinel'

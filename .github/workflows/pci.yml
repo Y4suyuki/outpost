@@ -42,3 +42,40 @@ jobs:
         run: |
           cd materiel/playbooks
           ansible-playbook site.yml --syntax-check
+
+  nix-bootstrap-e2e:
+    name: nix-bootstrap E2E (live install on runner)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Outpost
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          pipx install ansible-core
+          ansible-galaxy collection install community.general
+
+      - name: Apply nix-bootstrap to the runner itself
+        # connection: local + become: sudo means the role runs against this
+        # same ephemeral runner — a cold-start rehearsal of bootstrapping a
+        # station target. Fails the job if Nix does not actually install.
+        run: |
+          cd materiel/playbooks
+          cat > inventory/hosts.ini <<'EOF'
+          [stations]
+          ci-runner ansible_host=127.0.0.1 ansible_connection=local ansible_user=root
+          EOF
+          ansible-playbook -i inventory/hosts.ini site.yml \
+            --limit ci-runner \
+            --extra-vars "profile=recon" -v
+
+      - name: Verify Nix is installed and functional
+        run: |
+          # The multi-user installer places nix under the system profile and
+          # registers it in /etc/profile.d.
+          test -d /nix/store
+          nix --version
+          # The station contract: the recon loadout devShell must build with
+          # the nix the role just installed (not the action's nix).
+          cd loadouts/recon
+          nix develop --command echo "Station flake reachable on bootstrapped host."
