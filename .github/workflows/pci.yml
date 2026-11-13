@@ -72,10 +72,14 @@ jobs:
       - name: Verify Nix is installed and functional
         run: |
           # The multi-user installer places nix under the system profile and
-          # registers it in /etc/profile.d.
+          # registers it in /etc/profile.d/nix.sh. CI run-steps are
+          # non-interactive (no profile load), so use the absolute path —
+          # the same one the role's post-install check uses.
           test -d /nix/store
-          nix --version
+          NIX=/nix/var/nix/profiles/default/bin/nix
+          $NIX --version
           # The station contract: the recon loadout devShell must build with
           # the nix the role just installed (not the action's nix).
           cd loadouts/recon
-          nix develop --command echo "Station flake reachable on bootstrapped host."
+          PATH="/nix/var/nix/profiles/default/bin:$PATH" \
+            $NIX develop --command echo "Station flake reachable on bootstrapped host."
