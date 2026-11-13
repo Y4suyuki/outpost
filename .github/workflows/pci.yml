@@ -83,3 +83,8 @@ jobs:
           cd loadouts/recon
           PATH="/nix/var/nix/profiles/default/bin:$PATH" \
             $NIX develop --command echo "Station flake reachable on bootstrapped host."
+          # Pin the advertised contract: the subpath flake ref the role's
+          # post-bootstrap message points at must resolve (an earlier
+          # revision pointed at a non-existent `#recon` devShell).
+          $NIX develop github:Y4suyuki/outpost/loadouts/recon \
+            --command echo "Advertised bootstrap one-liner resolves."

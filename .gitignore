@@ -20,3 +20,4 @@ result-*
 # Ansible artifacts
 *.retry
 .ansible/
+materiel/playbooks/inventory/hosts.ini

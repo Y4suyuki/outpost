@@ -3,8 +3,10 @@
 # so it can host an outpost station (recon/tactical/garrison).
 #
 # The station toolchain itself lives in the outpost flake; the host only
-# needs `nix`. After this role, the target user can run:
-#   nix develop github:Y4suyuki/outpost#recon
+# After this role, the target user can run:
+#   nix develop github:Y4suyuki/outpost/loadouts/recon
+# (subpath flake ref — the root flake has no `#recon` devShell; `#recon`
+# only exists as a `nix flake init -t` template)
 #
 # multi-user install (the only supported mode under root / ansible become):
 #   - creates nixbld1..N build users + nix-daemon systemd unit

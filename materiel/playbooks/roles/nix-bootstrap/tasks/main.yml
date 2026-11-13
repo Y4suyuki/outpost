@@ -88,5 +88,5 @@
   ansible.builtin.debug:
     msg: >-
       Nix ready on {{ inventory_hostname }}: {{ nix_version.stdout }}.
-      Station toolchain: nix develop github:Y4suyuki/outpost#recon
+      Station toolchain: nix develop github:Y4suyuki/outpost/loadouts/recon
   changed_when: false
