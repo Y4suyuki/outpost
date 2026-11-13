@@ -73,7 +73,7 @@
   ansible.builtin.lineinfile:
     path: /etc/nix/nix.conf
     regexp: '^experimental-features\s*='
-    line: "experimental-features = nix-command"
+    line: "experimental-features = nix-command flakes"
     create: true
     mode: "0644"
   when: not nix_store.stat.exists
