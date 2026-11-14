@@ -4,8 +4,8 @@
 #
 # The station toolchain itself lives in the outpost flake; the host only
 # After this role, the target user can run:
-#   nix develop github:Y4suyuki/outpost/loadouts/recon
-# (subpath flake ref — the root flake has no `#recon` devShell; `#recon`
+#   nix develop 'github:Y4suyuki/outpost?dir=loadouts/recon'
+# (subpath via ?dir= — the root flake has no `#recon` devShell; `#recon`
 # only exists as a `nix flake init -t` template)
 #
 # multi-user install (the only supported mode under root / ansible become):
