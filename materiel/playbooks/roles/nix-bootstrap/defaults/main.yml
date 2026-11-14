@@ -1,0 +1,24 @@
+---
+# Nix bootstrap: give a non-Nix target (Debian/Ubuntu) the Nix toolchain
+# so it can host an outpost station (recon/tactical/garrison).
+#
+# The station toolchain itself lives in the outpost flake; the host only
+# After this role, the target user can run:
+#   nix develop 'github:Y4suyuki/outpost?dir=loadouts/recon'
+# (subpath via ?dir= — the root flake has no `#recon` devShell; `#recon`
+# only exists as a `nix flake init -t` template)
+#
+# multi-user install (the only supported mode under root / ansible become):
+#   - creates nixbld1..N build users + nix-daemon systemd unit
+#   - /nix/store is shared, builds run in user namespaces via the daemon
+#
+# NOTE: the installer's single-user (`--no-daemon`) mode is NOT supported
+# under root ("installing Nix as root is not supported by this script"),
+# so this role always installs multi-user. For a pure single-user box, run
+# the installer by hand as that user instead of this role.
+nix_build_users: 32
+nix_no_channel_add: true
+
+# Extra args passed through to the official installer, e.g.
+# "--no-modify-profile". Leave empty for the defaults.
+nix_install_extra_args: ""
